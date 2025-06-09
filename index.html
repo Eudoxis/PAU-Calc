@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Notas PAU/EBAU/EvAU (España)</title>
+    <meta name="description" content="Calcula tu nota de acceso a la universidad en España (PAU, EBAU, EvAU) de forma sencilla y precisa.">
+
+    <!-- Preconnect para Google Fonts (opcional, si usas fuentes externas) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS INLINE - Contenido de styles.css */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --text-color: #343a40;
+            --light-text-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --border-radius: 0.3rem;
+            --font-family-header: 'Montserrat', sans-serif;
+            --font-family-body: 'Open Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family-body);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased; /* Para Safari */
+            -moz-osx-font-smoothing: grayscale; /* Para Safari */
+        }
+
+        /* Modo Oscuro - Opcional */
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--light-text-color);
+        }
+        body.dark-mode .container,
+        body.dark-mode .card,
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select,
+        body.dark-mode .form-group textarea {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: var(--light-text-color);
+        }
+        body.dark-mode .card-header {
+            background-color: #343a40;
+            border-color: #6c757d;
+        }
+        body.dark-mode .btn {
+            color: var(--light-text-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        header h1 {
+            margin: 0;
+            font-family: var(--font-family-header);
+            font-size: 1.8rem;
+        }
+        @media (min-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            flex-grow: 1;
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr; /* Una columna por defecto */
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 2fr 1fr; /* Dos columnas para pantallas más grandes */
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                grid-template-columns: 3fr 2fr; /* Ajuste para pantallas muy grandes */
+            }
+        }
+
+        .calculator-container {
+            grid-column: 1 / -1; /* Ocupa todo el ancho en móvil */
+        }
+
+        @media (min-width: 768px) {
+            .calculator-container {
+                grid-column: span 1; /* Ocupa una columna en escritorio */
+            }
+        }
+
+        .results-container, .info-container {
+            grid-column: 1 / -1; /* Ocupan todo el ancho en móvil */
+        }
+
+        @media (min-width: 768px) {
+            .results-container {
+                grid-column: 2 / 3; /* Ocupa la segunda columna en escritorio */
+                grid-row: 1 / 2; /* Se alinea con el calculador */
+            }
+            .info-container {
+                grid-column: 1 / -1; /* Ocupa todo el ancho debajo del calculador y resultados */
+            }
+        }
+
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+        .card-header {
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem; /* Ajustar padding y margen */
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            font-family: var(--font-family-header);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+            font-size: 1rem;
+            -webkit-appearance: none; /* Eliminar estilos nativos en Safari/iOS */
+            appearance: none; /* Eliminar estilos nativos */
+        }
+        .form-group input[type="number"]::-webkit-outer-spin-button,
+        .form-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .form-group input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+        .input-group input[type="number"] {
+            flex-grow: 1;
+            margin-right: 0.5rem;
+        }
+        .input-group label.checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: normal; /* Checkbox label no tan negrita */
+            font-size: 0.9rem;
+            white-space: nowrap; /* Evitar que el texto del checkbox se rompa */
+        }
+        .input-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: auto;
+            height: auto;
+            -webkit-appearance: checkbox; /* Asegura que el checkbox se vea como tal en iOS */
+            appearance: checkbox;
+        }
+        .input-group select {
+            width: auto; /* Permitir que el select tome el ancho necesario */
+            min-width: 80px; /* Ancho mínimo para el select de ponderación */
+            margin-left: 0.5rem;
+        }
+        .input-group select:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.2s ease;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Eliminar highlight en iOS */
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn:active {
+            background-color: #004085;
+        }
+        .btn:disabled {
+            background-color: var(--secondary-color);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            margin-top: 0.5rem;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .results {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        .result-item strong {
+            font-family: var(--font-family-header);
+            font-weight: 600;
+        }
+        .result-value span {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        /* Colores para validación de resultados */
+        .result-value.note-fail span { color: var(--danger-color); }
+        .result-value.note-pass span { color: var(--success-color); }
+        .result-value.note-intermediate span { color: var(--warning-color); }
+        .result-value.note-excellent span { color: var(--success-color); }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: #383d41;
+            background-color: #e2e3e5;
+            border: 1px solid #d6d8db;
+        }
+        .message.info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        .message.warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .message.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .additional-materias-group {
+            border: 1px dashed var(--border-color);
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
+            background-color: var(--dark-bg);
+            color: var(--light-text-color);
+            font-size: 0.85rem;
+        }
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilo para el toggle de modo oscuro */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white; /* Color inicial en header */
+            transition: color 0.2s ease;
+        }
+        .dark-mode-toggle:hover {
+            color: #ddd;
+        }
+        body.dark-mode .dark-mode-toggle {
+            color: var(--light-text-color);
+        }
+
+        .collapsible-header {
+            cursor: pointer;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px dashed var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .collapsible-header:hover {
+            color: var(--primary-color);
+        }
+        .collapsible-header .arrow {
+            transition: transform 0.3s ease;
+        }
+        .collapsible-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 1000px; /* Valor grande para ocultar/mostrar */
+        }
+        .collapsible-content.collapsed {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Alternar modo oscuro">💡</button>
+        <h1>Calculadora de Nota de Acceso a la Universidad</h1>
+        <p>PAU / EBAU / EvAU (España)</p>
+    </header>
+
+    <main class="container">
+        <section class="calculator-container">
+            <form id="pauCalculatorForm" class="card">
+                <div class="card-header">Fase Obligatoria (General)</div>
+
+                <div class="form-group info message">
+                    <p>Introduce tus notas de 0 a 10 con hasta 3 decimales.</p>
+                    <p>Marca "Pondera para admisión" y selecciona la ponderación si la materia también te cuenta para la nota de admisión (fase voluntaria).</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="bachilleratoNota">Nota Media de Bachillerato (0-10)</label>
+                    <input type="number" id="bachilleratoNota" step="0.001" min="0" max="10" placeholder="Ej: 8.250" required aria-describedby="bachilleratoNotaHelp">
+                    <small id="bachilleratoNotaHelp" class="message info">Tu nota media del expediente de Bachillerato.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="lenguaNota">Lengua Castellana y Literatura II</label>
+                    <div class="input-group">
+                        <input type="number" id="lenguaNota" step="0.001" min="0" max="10" placeholder="Ej: 7.500" required>
+                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="lenguaNota"> Pondera para admisión</label>
+                        <select class="ponderacion-select" disabled>
+                            <option value="0.1">0.1</option>
+                            <option value="0.15">0.15</option>
+                            <option value="0.2" selected>0.2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="historiaFiloNota">Historia de España o Historia de la Filosofía</label>
+                    <div class="input-group">
+                        <input type="number" id="historiaFiloNota" step="0.001" min="0" max="10" placeholder="Ej: 6.800" required>
+                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="historiaFiloNota"> Pondera para admisión</label>
+                        <select class="ponderacion-select" disabled>
+                            <option value="0.1">0.1</option>
+                            <option value="0.15">0.15</option>
+                            <option value="0.2" selected>0.2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="extranjeraNota">Lengua Extranjera (Inglés/Francés/etc.)</label>
+                    <div class="input-group">
+                        <input type="number" id="extranjeraNota" step="0.001" min="0" max="10" placeholder="Ej: 9.000" required>
+                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="extranjeraNota"> Pondera para admisión</label>
+                        <select class="ponderacion-select" disabled>
+                            <option value="0.1">0.1</option>
+                            <option value="0.15">0.15</option>
+                            <option value="0.2" selected>0.2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="modalidadNota">Materia Troncal de Modalidad</label>
+                    <div class="input-group">
+                        <input type="number" id="modalidadNota" step="0.001" min="0" max="10" placeholder="Ej: 8.750" required>
+                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="modalidadNota"> Pondera para admisión</label>
+                        <select class="ponderacion-select" disabled>
+                            <option value="0.1">0.1</option>
+                            <option value="0.15">0.15</option>
+                            <option value="0.2" selected>0.2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card-header" style="margin-top: 2rem;">Fase Voluntaria (Admisión)</div>
+
+                <div class="form-group info message">
+                    <p>Introduce hasta 4 notas de materias voluntarias. Si no tienes o no quieres usar alguna, déjala en blanco.</p>
+                    <p>Cualquier nota inferior a 5.0 en estas materias no ponderará.</p>
+                </div>
+
+                <div id="additionalMaterias" class="additional-materias-group">
+                    <div class="form-group">
+                        <label for="adicional1Nota">Materia Adicional 1</label>
+                        <div class="input-group">
+                            <input type="number" id="adicional1Nota" step="0.001" min="0" max="10" placeholder="Ej: 7.000 (opcional)">
+                            <select class="ponderacion-select" id="adicional1Ponderacion">
+                                <option value="0.1">0.1</option>
+                                <option value="0.15">0.15</option>
+                                <option value="0.2" selected>0.2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="adicional2Nota">Materia Adicional 2</label>
+                        <div class="input-group">
+                            <input type="number" id="adicional2Nota" step="0.001" min="0" max="10" placeholder="Ej: 8.500 (opcional)">
+                            <select class="ponderacion-select" id="adicional2Ponderacion">
+                                <option value="0.1">0.1</option>
+                                <option value="0.15">0.15</option>
+                                <option value="0.2" selected>0.2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="adicional3Nota">Materia Adicional 3</label>
+                        <div class="input-group">
+                            <input type="number" id="adicional3Nota" step="0.001" min="0" max="10" placeholder="Ej: 6.200 (opcional)">
+                            <select class="ponderacion-select" id="adicional3Ponderacion">
+                                <option value="0.1">0.1</option>
+                                <option value="0.15">0.15</option>
+                                <option value="0.2" selected>0.2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="adicional4Nota">Materia Adicional 4</label>
+                        <div class="input-group">
+                            <input type="number" id="adicional4Nota" step="0.001" min="0" max="10" placeholder="Ej: 9.100 (opcional)">
+                            <select class="ponderacion-select" id="adicional4Ponderacion">
+                                <option value="0.1">0.1</option>
+                                <option value="0.15">0.15</option>
+                                <option value="0.2" selected>0.2</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <button type="submit" class="btn" id="calculateBtn">Calcular Nota</button>
+                <button type="button" class="btn btn-secondary" id="resetBtn">Limpiar Campos</button>
+            </form>
+        </section>
+
+        <section class="results-container">
+            <div class="card" id="resultsCard">
+                <div class="card-header">Tus Resultados</div>
+                <div class="results">
+                    <div class="result-item">
+                        <span>Nota Media PAU (Fase Obligatoria):</span>
+                        <div class="result-value"><span id="notaMediaPauResult">N/A</span></div>
+                    </div>
+                    <div class="result-item">
+                        <span>Nota de Acceso:</span>
+                        <div class="result-value"><span id="notaAccesoResult">N/A</span></div>
+                    </div>
+                    <div class="message warning" id="pauMin4Warning" style="display: none;">
+                        ¡Atención! La nota media de la Fase Obligatoria debe ser de al menos 4.0 para poder calcular tu Nota de Acceso.
+                    </div>
+                    <div class="message warning" id="accesoMin5Warning" style="display: none;">
+                        ¡Atención! Tu Nota de Acceso debe ser de al menos 5.0 para poder acceder a la universidad.
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">Nota de Admisión (0 - 14)</h3>
+                    <div class="result-item">
+                        <span>Ponderación Materia 1:</span>
+                        <div class="result-value"><span id="ponderacion1Result">N/A</span></div>
+                    </div>
+                    <div class="result-item">
+                        <span>Ponderación Materia 2:</span>
+                        <div class="result-value"><span id="ponderacion2Result">N/A</span></div>
+                    </div>
+                    <div class="result-item">
+                        <strong><span>Nota Final de Admisión:</span></strong>
+                        <div class="result-value"><span id="notaAdmisionResult">N/A</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="info-container">
+            <div class="card">
+                <div class="card-header collapsible-header" id="faqHeader">
+                    <span>Preguntas Frecuentes (FAQ)</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="collapsible-content" id="faqContent">
+                    <h4 style="margin-top: 0;">¿Qué es la PAU/EBAU/EvAU?</h4>
+                    <p>Es la Prueba de Acceso a la Universidad en España. Consta de una "Fase Obligatoria" (o General) que otorga la Nota de Acceso (hasta 10 puntos) y una "Fase Voluntaria" (o de Admisión) que permite subir la nota hasta 14 puntos.</p>
+
+                    <h4>¿Cómo se calcula la Nota de Acceso (hasta 10 puntos)?</h4>
+                    <p>Se calcula con la siguiente fórmula:</p>
+                    <p><code>Nota de Acceso = (0.4 × Nota Media PAU/EvAU Obligatoria) + (0.6 × Nota Media Bachillerato)</code></p>
+                    <p>Para poder acceder a la universidad, la Nota Media de la Fase Obligatoria de la PAU debe ser al menos 4.0 y la Nota de Acceso resultante debe ser al menos 5.0.</p>
+
+                    <h4>¿Cómo se calcula la Nota de Admisión (hasta 14 puntos)?</h4>
+                    <p>La Nota de Admisión es la Nota de Acceso sumada a las dos mejores notas de materias específicas (Fase Voluntaria) ponderadas por su coeficiente (0.1, 0.15 o 0.2).</p>
+                    <p><code>Nota de Admisión = Nota de Acceso + (Nota específica 1 × Ponderación) + (Nota específica 2 × Ponderación)</code></p>
+                    <p>Solo se consideran para la suma aquellas notas de materias ponderables en las que hayas obtenido al menos un 5.0.</p>
+                    <p>Las materias de la fase obligatoria también pueden ponderar si la universidad lo considera y has obtenido al menos un 5.0.</p>
+                </div>
+            </div>
+            <!-- Otros info cards si se desean -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Calculadora PAU/EBAU. Creado con fines educativos.</p>
+        <p><a href="#">Política de Privacidad</a> | <a href="#">Términos de Uso</a></p>
+    </footer>
+
+    <script>
+        // JAVASCRIPT INLINE - Contenido de script.js
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('pauCalculatorForm');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+
+            // Resultados
+            const notaMediaPauResult = document.getElementById('notaMediaPauResult');
+            const notaAccesoResult = document.getElementById('notaAccesoResult');
+            const ponderacion1Result = document.getElementById('ponderacion1Result');
+            const ponderacion2Result = document.getElementById('ponderacion2Result');
+            const notaAdmisionResult = document.getElementById('notaAdmisionResult');
+
+            // Mensajes de validación
+            const pauMin4Warning = document.getElementById('pauMin4Warning');
+            const accesoMin5Warning = document.getElementById('accesoMin5Warning');
+
+            // Selectores de ponderación
+            const obligatoriaCheckboxes = document.querySelectorAll('input[type="checkbox"][data-materia-obligatoria="true"]');
+
+            // Colapsable FAQ
+            const faqHeader = document.getElementById('faqHeader');
+            const faqContent = document.getElementById('faqContent');
+
+            // Cargar estado de modo oscuro desde localStorage
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+
+            // Función para alternar la visibilidad y accesibilidad de los selects de ponderación
+            obligatoriaCheckboxes.forEach(checkbox => {
+                const selectElement = checkbox.closest('.input-group').querySelector('.ponderacion-select');
+                
+                // Cargar estado desde sessionStorage (si existe)
+                const storedState = sessionStorage.getItem(checkbox.id + '_checked');
+                if (storedState === 'true') {
+                    checkbox.checked = true;
+                    selectElement.disabled = false;
+                    const storedPonderation = sessionStorage.getItem(checkbox.id + '_ponderation');
+                    if (storedPonderation) {
+                        selectElement.value = storedPonderation;
+                    }
+                }
+
+                checkbox.addEventListener('change', () => {
+                    selectElement.disabled = !checkbox.checked;
+                    // Guardar estado en sessionStorage
+                    sessionStorage.setItem(checkbox.id + '_checked', checkbox.checked);
+                    if (checkbox.checked) {
+                        sessionStorage.setItem(checkbox.id + '_ponderation', selectElement.value);
+                    } else {
+                        sessionStorage.removeItem(checkbox.id + '_ponderation');
+                    }
+                });
+
+                selectElement.addEventListener('change', () => {
+                    sessionStorage.setItem(checkbox.id + '_ponderation', selectElement.value);
+                });
+            });
+
+            // Persistencia de datos en sessionStorage para inputs
+            document.querySelectorAll('#pauCalculatorForm input[type="number"], #pauCalculatorForm select:not(.ponderacion-select)').forEach(input => {
+                const storedValue = sessionStorage.getItem(input.id);
+                if (storedValue !== null) {
+                    input.value = storedValue;
+                }
+                input.addEventListener('input', () => {
+                    sessionStorage.setItem(input.id, input.value);
+                });
+            });
+
+            // Cargar último estado de la fase voluntaria de sessionStorage
+            document.querySelectorAll('#additionalMaterias input[type="number"], #additionalMaterias select').forEach(input => {
+                const storedValue = sessionStorage.getItem(input.id);
+                if (storedValue !== null) {
+                    input.value = storedValue;
+                }
+                input.addEventListener('input', () => {
+                    sessionStorage.setItem(input.id, input.value);
+                });
+                input.addEventListener('change', () => { // Para los selects
+                    sessionStorage.setItem(input.id, input.value);
+                });
+            });
+
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Evita el envío del formulario
+                calculateNotes();
+            });
+
+            resetBtn.addEventListener('click', () => {
+                form.reset();
+                obligatoriaCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.closest('.input-group').querySelector('.ponderacion-select').disabled = true;
+                });
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                // Limpiar resultados
+                clearResults();
+                // Ocultar mensajes de validación
+                pauMin4Warning.style.display = 'none';
+                accesoMin5Warning.style.display = 'none';
+            });
+
+            function getInputValue(id) {
+                const input = document.getElementById(id);
+                return parseFloat(input.value) || 0; // Retorna 0 si está vacío o no es un número
+            }
+
+            function formatNote(note) {
+                return note.toFixed(3);
+            }
+
+            function setResultValue(element, value, type = 'text') {
+                element.textContent = value;
+                // Eliminar clases anteriores de color
+                element.closest('.result-value').classList.remove('note-fail', 'note-pass', 'note-intermediate', 'note-excellent');
+
+                if (type === 'note') {
+                    const parsedValue = parseFloat(value);
+                    if (!isNaN(parsedValue)) {
+                        if (parsedValue < 5) {
+                            element.closest('.result-value').classList.add('note-fail');
+                        } else if (parsedValue < 7) {
+                            element.closest('.result-value').classList.add('note-intermediate');
+                        } else if (parsedValue < 9) {
+                            element.closest('.result-value').classList.add('note-pass');
+                        } else {
+                            element.closest('.result-value').classList.add('note-excellent');
+                        }
+                    }
+                }
+            }
+            
+            function clearResults() {
+                setResultValue(notaMediaPauResult, 'N/A');
+                setResultValue(notaAccesoResult, 'N/A');
+                setResultValue(ponderacion1Result, 'N/A');
+                setResultValue(ponderacion2Result, 'N/A');
+                setResultValue(notaAdmisionResult, 'N/A');
+            }
+
+            function calculateNotes() {
+                pauMin4Warning.style.display = 'none';
+                accesoMin5Warning.style.display = 'none';
+                clearResults();
+
+
+                const bachilleratoNota = getInputValue('bachilleratoNota');
+                const lenguaNota = getInputValue('lenguaNota');
+                const historiaFiloNota = getInputValue('historiaFiloNota');
+                const extranjeraNota = getInputValue('extranjeraNota');
+                const modalidadNota = getInputValue('modalidadNota');
+
+                // Validar que todos los campos requeridos tengan un valor numérico válido (entre 0 y 10)
+                const requiredNotes = [
+                    { id: 'bachilleratoNota', value: bachilleratoNota },
+                    { id: 'lenguaNota', value: lenguaNota },
+                    { id: 'historiaFiloNota', value: historiaFiloNota },
+                    { id: 'extranjeraNota', value: extranjeraNota },
+                    { id: 'modalidadNota', value: modalidadNota }
+                ];
+
+                let allRequiredValid = true;
+                requiredNotes.forEach(note => {
+                    // console.log(`Validating ${note.id}: ${note.value}`);
+                    if (isNaN(note.value) || note.value < 0 || note.value > 10) {
+                        document.getElementById(note.id).focus(); // Pone el foco en el primer campo inválido
+                        document.getElementById(note.id).setCustomValidity('Por favor, introduce una nota válida (0-10)');
+                        document.getElementById(note.id).reportValidity();
+                        allRequiredValid = false;
+                    } else {
+                         document.getElementById(note.id).setCustomValidity(''); // Limpiar si ya es válido
+                    }
+                });
+
+                if (!allRequiredValid) {
+                    return; // Detener el cálculo si hay campos requeridos inválidos
+                }
+
+                // Cálculo Nota Media PAU (Fase Obligatoria)
+                const notaMediaPau = (lenguaNota + historiaFiloNota + extranjeraNota + modalidadNota) / 4;
+                setResultValue(notaMediaPauResult, formatNote(notaMediaPau), 'note');
+
+                // Validación: Nota PAU mínima 4.0
+                if (notaMediaPau < 4.0) {
+                    pauMin4Warning.style.display = 'block';
+                    setResultValue(notaAdmisionResult, 'N/A', 'note'); // Limpiar nota de admisión
+                    return; // Detener cálculo de acceso si no cumple
+                }
+
+                // Cálculo Nota de Acceso
+                const notaAcceso = (0.4 * notaMediaPau) + (0.6 * bachilleratoNota);
+                setResultValue(notaAccesoResult, formatNote(notaAcceso), 'note');
+
+                // Validación: Nota de Acceso mínima 5.0
+                if (notaAcceso < 5.0) {
+                    accesoMin5Warning.style.display = 'block';
+                    setResultValue(notaAdmisionResult, 'N/A', 'note'); // Limpiar nota de admisión
+                    return; // Detener cálculo de admisión si no cumple
+                }
+
+                // Cálculo Fase Voluntaria/de Admisión
+                let materiasPonderables = [];
+
+                // Materias obligatorias que ponderan
+                obligatoriaCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const inputElement = document.getElementById(checkbox.dataset.materiaId);
+                        const nota = parseFloat(inputElement.value);
+                        if (nota >= 5.0) { // Solo si la nota es >= 5.0
+                            const ponderacionSelect = checkbox.closest('.input-group').querySelector('.ponderacion-select');
+                            const ponderacion = parseFloat(ponderacionSelect.value);
+                            materiasPonderables.push({ nota: nota, ponderacion: ponderacion });
+                        }
+                    }
+                });
+
+                // Materias adicionales
+                for (let i = 1; i <= 4; i++) {
+                    const notaAdicional = getInputValue(`adicional${i}Nota`);
+                    if (notaAdicional >= 5.0) { // Solo si la nota es >= 5.0
+                        const ponderacionAdicional = parseFloat(document.getElementById(`adicional${i}Ponderacion`).value);
+                        materiasPonderables.push({ nota: notaAdicional, ponderacion: ponderacionAdicional });
+                    }
+                }
+
+                // Calcular las notas ponderadas y ordenar de mayor a menor
+                const notasPonderadas = materiasPonderables
+                    .map(materia => materia.nota * materia.ponderacion)
+                    .sort((a, b) => b - a); // Ordenar de mayor a menor
+
+                let ponderacionTotalAdicional = 0;
+                let ponderada1 = 0;
+                let ponderada2 = 0;
+
+                if (notasPonderadas.length > 0) {
+                    ponderada1 = notasPonderadas[0];
+                    setResultValue(ponderacion1Result, formatNote(ponderada1), 'note');
+                    if (notasPonderadas.length > 1) {
+                        ponderada2 = notasPonderadas[1];
+                        setResultValue(ponderacion2Result, formatNote(ponderada2), 'note');
+                    }
+                }
+
+                ponderacionTotalAdicional = ponderada1 + ponderada2;
+
+                // Cálculo Nota de Admisión (máx 14)
+                const notaAdmision = Math.min(14, notaAcceso + ponderacionTotalAdicional);
+                setResultValue(notaAdmisionResult, formatNote(notaAdmision > 0 ? notaAdmision : 0), 'note'); // Asegura que no sea negativo si hay errores de introducción.
+            }
+
+            // Collapsible para la FAQ
+            faqHeader.addEventListener('click', () => {
+                faqContent.classList.toggle('collapsed');
+                faqHeader.classList.toggle('collapsed');
+                const isCollapsed = faqContent.classList.contains('collapsed');
+                faqContent.style.maxHeight = isCollapsed ? '0' : faqContent.scrollHeight + 'px';
+                faqContent.setAttribute('aria-hidden', isCollapsed);
+                faqHeader.setAttribute('aria-expanded', !isCollapsed);
+            });
+
+            // Inicializar el estado colapsado (cerrado por defecto)
+            faqContent.classList.add('collapsed');
+            faqHeader.classList.add('collapsed');
+            faqContent.style.maxHeight = '0';
+            faqContent.setAttribute('aria-hidden', 'true');
+            faqHeader.setAttribute('aria-expanded', 'false');
+        });
+    </script>
+</body>
+</html>
