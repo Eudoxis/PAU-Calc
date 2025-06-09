@@ -218,6 +218,18 @@
             cursor: not-allowed;
         }
 
+        .highlight-group {
+            background-color: #e7f3ff;
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+        }
+
+        .example-text {
+            color: var(--secondary-color);
+            font-size: 0.85rem;
+            margin-left: 0.25rem;
+        }
+
         .btn {
             background-color: var(--primary-color);
             color: white;
@@ -394,7 +406,7 @@
 
                 <div class="form-group info message">
                     <p>Introduce tus notas de 0 a 10 con hasta 3 decimales.</p>
-                    <p>Marca "Pondera para admisión" y selecciona la ponderación si la materia también te cuenta para la nota de admisión (fase voluntaria).</p>
+                    <p>Si una materia obligatoria también pondera para tu universidad, marca la casilla "Pondera para admisión" y elige su coeficiente.</p>
                 </div>
 
                 <div class="form-group">
@@ -407,7 +419,7 @@
                     <label for="lenguaNota">Lengua Castellana y Literatura II</label>
                     <div class="input-group">
                         <input type="number" id="lenguaNota" step="0.001" min="0" max="10" placeholder="Ej: 7.500" required>
-                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="lenguaNota"> Pondera para admisión</label>
+                        <label class="checkbox-label" title="Marca si cuenta para la fase de admisión"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="lenguaNota"> Pondera para admisión</label>
                         <select class="ponderacion-select" disabled>
                             <option value="0.1">0.1</option>
                             <option value="0.15">0.15</option>
@@ -420,7 +432,7 @@
                     <label for="historiaFiloNota">Historia de España o Historia de la Filosofía</label>
                     <div class="input-group">
                         <input type="number" id="historiaFiloNota" step="0.001" min="0" max="10" placeholder="Ej: 6.800" required>
-                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="historiaFiloNota"> Pondera para admisión</label>
+                        <label class="checkbox-label" title="Marca si cuenta para la fase de admisión"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="historiaFiloNota"> Pondera para admisión</label>
                         <select class="ponderacion-select" disabled>
                             <option value="0.1">0.1</option>
                             <option value="0.15">0.15</option>
@@ -433,7 +445,7 @@
                     <label for="extranjeraNota">Lengua Extranjera (Inglés/Francés/etc.)</label>
                     <div class="input-group">
                         <input type="number" id="extranjeraNota" step="0.001" min="0" max="10" placeholder="Ej: 9.000" required>
-                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="extranjeraNota"> Pondera para admisión</label>
+                        <label class="checkbox-label" title="Marca si cuenta para la fase de admisión"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="extranjeraNota"> Pondera para admisión</label>
                         <select class="ponderacion-select" disabled>
                             <option value="0.1">0.1</option>
                             <option value="0.15">0.15</option>
@@ -443,10 +455,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="modalidadNota">Materia Troncal de Modalidad</label>
+                    <label for="modalidadNota">Materia Troncal de Modalidad <small class="example-text">(Ej: Matemáticas II, Latín II, Economía)</small></label>
                     <div class="input-group">
                         <input type="number" id="modalidadNota" step="0.001" min="0" max="10" placeholder="Ej: 8.750" required>
-                        <label class="checkbox-label"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="modalidadNota"> Pondera para admisión</label>
+                        <label class="checkbox-label" title="Marca si cuenta para la fase de admisión"><input type="checkbox" data-materia-obligatoria="true" data-materia-id="modalidadNota"> Pondera para admisión</label>
                         <select class="ponderacion-select" disabled>
                             <option value="0.1">0.1</option>
                             <option value="0.15">0.15</option>
@@ -624,13 +636,15 @@
 
             // Función para alternar la visibilidad y accesibilidad de los selects de ponderación
             obligatoriaCheckboxes.forEach(checkbox => {
-                const selectElement = checkbox.closest('.input-group').querySelector('.ponderacion-select');
+                const inputGroup = checkbox.closest('.input-group');
+                const selectElement = inputGroup.querySelector('.ponderacion-select');
                 
                 // Cargar estado desde sessionStorage (si existe)
                 const storedState = sessionStorage.getItem(checkbox.id + '_checked');
                 if (storedState === 'true') {
                     checkbox.checked = true;
                     selectElement.disabled = false;
+                    inputGroup.classList.add('highlight-group');
                     const storedPonderation = sessionStorage.getItem(checkbox.id + '_ponderation');
                     if (storedPonderation) {
                         selectElement.value = storedPonderation;
@@ -639,6 +653,7 @@
 
                 checkbox.addEventListener('change', () => {
                     selectElement.disabled = !checkbox.checked;
+                    inputGroup.classList.toggle('highlight-group', checkbox.checked);
                     // Guardar estado en sessionStorage
                     sessionStorage.setItem(checkbox.id + '_checked', checkbox.checked);
                     if (checkbox.checked) {
@@ -688,7 +703,9 @@
                 form.reset();
                 obligatoriaCheckboxes.forEach(checkbox => {
                     checkbox.checked = false;
-                    checkbox.closest('.input-group').querySelector('.ponderacion-select').disabled = true;
+                    const group = checkbox.closest('.input-group');
+                    group.querySelector('.ponderacion-select').disabled = true;
+                    group.classList.remove('highlight-group');
                 });
                 // Limpiar sessionStorage
                 sessionStorage.clear();
